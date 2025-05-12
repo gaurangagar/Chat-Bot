@@ -29,6 +29,9 @@ const userSchema=new Schema({
         required:true,
         select:false
     },
+    socketId:{
+        type:String,
+    }
 },{timestamps:true})
 
 const UserModel=model('user',userSchema)

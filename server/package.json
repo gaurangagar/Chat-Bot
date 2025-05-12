@@ -9,6 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@socket.io/cluster-adapter": "^0.2.2",
     "cookie-parser": "^1.4.7",
     "cookies": "^0.9.1",
     "dotenv": "^16.5.0",

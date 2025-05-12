@@ -1,42 +1,67 @@
 const express = require('express');
 const http = require('http');
-const mongoose=require('mongoose')
-const path=require('path')
+const mongoose = require('mongoose');
+const path = require('path');
 const { Server } = require("socket.io");
 require('dotenv').config();
+const { availableParallelism } = require('node:os');
+const cluster = require('node:cluster');
+const { createAdapter, setupPrimary } = require('@socket.io/cluster-adapter');
+const cookieParser = require('cookie-parser');
 
-const cookieParser=require('cookie-parser')
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
-const port=process.env.PORT || 3000
-
-const userRoutes=require('./routes/user.routes');
+const userRoutes = require('./routes/user.routes');
 const { restrictToLoggedinUserOnly } = require('./middleware/auth');
 
-app.use(express.static(path.resolve('./public')))
-app.use(express.json());
-app.use(express.urlencoded({extended : false}))
-app.use(cookieParser())
+if (cluster.isPrimary) {
+  const numCPUs = availableParallelism();
+  // create one worker per available core
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork({
+      PORT: 8000 + i
+    });
+  }
 
-mongoose.connect(process.env.MONGO_URL).then(e=>console.log('mongodb connected'))
+  // set up the adapter on the primary thread
+  return setupPrimary();
+} else {
+  const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server, {
+    connectionStateRecovery: {},
+    adapter: createAdapter()
+  });
+  const port = process.env.PORT || 3000;
 
-server.listen(port, () => {
-  console.log(`listening on *:${port}`);
-});
+  app.use(express.static(path.resolve('./public')));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+  app.use(cookieParser());
 
-io.on('connection', (socket) => {
-    socket.on('user-message',message=>{
-        io.emit('message',message)
-    })
-    socket.on('disconnect', function() {
+  mongoose.connect(process.env.MONGO_URL).then(e => console.log('mongodb connected'));
+
+  server.listen(port, () => {
+    console.log(`listening on *:${port}`);
+  });
+
+  io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.join('some room');
+    // broadcast to all connected clients in the room
+    io.to('some room').emit('chat message', 'world');
+    io.except('some room').emit('chat message', 'random');
+    socket.leave('some room');
+    socket.on('disconnect', () => {
       console.log('user disconnected');
+    });
+    socket.on('chat message', (msg) => {
+      console.log(msg);
+      io.emit('chat message', msg);
     });
   });
 
-app.use('/user',userRoutes)
+  app.use('/user', userRoutes);
 
-app.get('/',restrictToLoggedinUserOnly, (req, res) => {
-    res.sendFile('./public/index.html')
+  app.get('/', restrictToLoggedinUserOnly, (req, res) => {
+    res.sendFile('./public/index.html');
   });
+}

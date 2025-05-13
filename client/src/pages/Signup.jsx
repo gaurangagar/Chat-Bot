@@ -1,27 +1,72 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Signup = () => {
+
+    const [email, setemail] = useState('');
+        const [password, setpassword] = useState('');
+        const [firstName, setfirstName] = useState('')
+        const [lastName, setlastName] = useState('')
+        const [userName, setuserName] = useState('')
+    
+        const navigate = useNavigate();
+
+        const submitHandler = async (e) => {
+            e.preventDefault();
+            const user = {
+                fullName:{
+                    firstName:firstName,
+                    lastName:lastName
+                },
+                userName:userName,
+                email: email,
+                password: password,
+            };
+            try {
+                const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/register`, user);
+                console.log(response);
+                navigate('/dashboard');
+                setemail('');
+                setpassword('');
+                setfirstName('')
+                setlastName('')
+                setuserName('')
+            } catch (error) {
+                console.error('Signup failed:', error);
+            }
+        };
+
     return (
+        
         <div>
-            <form>
+            <form onSubmit={submitHandler}>
             <div className="mb-3">
                     <label htmlFor="exampleInputName" className="form-label">
                         Name
                     </label>
                     <div className='flex gap-0.5'>
                     <input
-                        type="name"
+                        type="text"
                         className="form-control"
-                        id="exampleInputName"
+                        id="exampleFirstName"
                         aria-describedby="nameHelp"
                         placeholder='First Name'
+                        value={firstName}
+                        onChange={(e) => {
+                            setfirstName(e.target.value);
+                        }}
                     />
                     <input
-                    type="name"
+                    type="text"
                     className="form-control"
-                    id="exampleInputName"
+                    id="exampleLastName"
                     aria-describedby="nameHelp"
                     placeholder='Last Name'
+                    value={lastName}
+                        onChange={(e) => {
+                            setlastName(e.target.value);
+                        }}
                 />
                     </div>
                     
@@ -35,6 +80,10 @@ const Signup = () => {
                         className="form-control"
                         id="exampleInputEmail1"
                         aria-describedby="emailHelp"
+                        value={email}
+                        onChange={(e) => {
+                            setemail(e.target.value);
+                        }}
                     />
                     <div id="emailHelp" className="form-text">
                         We'll never share your email with anyone else.
@@ -45,9 +94,13 @@ const Signup = () => {
                         UserName
                     </label>
                     <input
-                        type="name"
+                        type="text"
                         className="form-control"
                         id="exampleInputUserName"
+                        value={userName}
+                        onChange={(e) => {
+                            setuserName(e.target.value);
+                        }}
                     />
                 </div>
                 <div className="mb-3">
@@ -58,6 +111,10 @@ const Signup = () => {
                         type="password"
                         className="form-control"
                         id="exampleInputPassword1"
+                        value={password}
+                        onChange={(e) => {
+                            setpassword(e.target.value);
+                        }}
                     />
                 </div>
                 <button type="submit" className="btn btn-primary">

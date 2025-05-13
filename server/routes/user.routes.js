@@ -4,7 +4,7 @@ const { handleUserSignup,handleUserLogin }=require('../controllers/user')
 
 router.post('/register',handleUserSignup);
 
-router.get('/login',handleUserLogin)
+router.post('/login',handleUserLogin)
 
   
 module.exports=router

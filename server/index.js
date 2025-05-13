@@ -8,6 +8,7 @@ const { availableParallelism } = require('node:os');
 const cluster = require('node:cluster');
 const { createAdapter, setupPrimary } = require('@socket.io/cluster-adapter');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 const userRoutes = require('./routes/user.routes');
 const { restrictToLoggedinUserOnly } = require('./middleware/auth');
@@ -25,6 +26,10 @@ if (cluster.isPrimary) {
   return setupPrimary();
 } else {
   const app = express();
+  app.use(cors({
+  origin: 'http://localhost:5173', // Allow frontend access
+  credentials: true,               // Allow cookies/auth headers if needed
+}));
   const server = http.createServer(app);
   const io = new Server(server, {
     connectionStateRecovery: {},

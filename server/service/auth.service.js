@@ -8,7 +8,7 @@ function getUser(id) {
     return sessionIdtoUserMap.get(id)
 }
 
-export default{
-    setUser,
-    getUser
+module.exports = {
+  setUser,
+  getUser
 }

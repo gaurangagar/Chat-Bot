@@ -1,0 +1,62 @@
+import { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+import { CurrentUserDataContext } from '../context/CurrentUserContext';
+
+const SearchBar = () => {
+  const [allUsers, setallUsers] = useState([]);
+  const context = useContext(CurrentUserDataContext);
+  const { currentUser, setcurrentUser } = context;
+
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_BASE_URL}/api/allusers`)
+      .then((response) => {
+        console.log(response.data);
+        setallUsers(response.data);
+      })
+      .catch((error) => {
+        console.log('Error fetching users:', error);
+      });
+  }, []);
+
+  const [searchText, setSearchText] = useState('');
+  const filteredUsers = allUsers?.filter(user =>
+    user.fullName.firstName.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const handleSetCurrentUser = (user) => {
+    setcurrentUser(user);
+    localStorage.setItem('user',JSON.stringify(user))
+    console.log('Current user set to:', user);
+  };
+
+  return (
+    <div>
+      <form className="d-flex">
+        <input
+          className="form-control me-2"
+          type="search"
+          placeholder="Search"
+          aria-label="Search"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+      </form>
+      <ul>
+        {!filteredUsers || filteredUsers.length === 0 ? (
+          <li>No users found.</li>
+        ) : (
+          filteredUsers.map((user, index) => (
+            <li key={index}>
+              <button
+                onClick={() => handleSetCurrentUser(user)}
+              >{user.fullName.firstName}</button>
+            </li>
+          ))
+        )}
+      </ul>
+    </div>
+  );
+};
+
+export default SearchBar;

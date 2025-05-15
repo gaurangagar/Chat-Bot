@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const userRoutes = require('./routes/user.routes');
+const apiRoutes =require('./routes/api.routes')
 const { restrictToLoggedinUserOnly } = require('./middleware/auth');
 
 if (cluster.isPrimary) {
@@ -65,6 +66,7 @@ if (cluster.isPrimary) {
   });
 
   app.use('/user', userRoutes);
+  app.use('/api', apiRoutes);
 
   app.get('/', restrictToLoggedinUserOnly, (req, res) => {
     res.sendFile('./public/index.html');

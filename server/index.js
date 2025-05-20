@@ -6,69 +6,73 @@ const { Server } = require("socket.io");
 require('dotenv').config();
 const { availableParallelism } = require('node:os');
 const cluster = require('node:cluster');
-const { createAdapter, setupPrimary } = require('@socket.io/cluster-adapter');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const userRoutes = require('./routes/user.routes');
-const apiRoutes =require('./routes/api.routes')
+const apiRoutes = require('./routes/api.routes');
 const { restrictToLoggedinUserOnly } = require('./middleware/auth');
 
-if (cluster.isPrimary) {
-  const numCPUs = availableParallelism();
-  // create one worker per available core
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork({
-      PORT: 8000 + i
-    });
-  }
-
-  // set up the adapter on the primary thread
-  return setupPrimary();
-} else {
-  const app = express();
-  app.use(cors({
+const app = express();
+app.use(cors({
   origin: 'http://localhost:5173', // Allow frontend access
   credentials: true,               // Allow cookies/auth headers if needed
 }));
-  const server = http.createServer(app);
-  const io = new Server(server, {
-    connectionStateRecovery: {},
-    adapter: createAdapter()
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",  // <-- your React app URL
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+const port = process.env.PORT || 3000;
+
+app.use(express.static(path.resolve('./public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
+
+mongoose.connect(process.env.MONGO_URL).then(e => console.log('mongodb connected'));
+
+server.listen(port, () => {
+  console.log(`listening on *:${port}`);
+});
+
+let users = {};
+
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  socket.on('register', (userId) => {
+    users[userId] = socket.id;
+    console.log('User registered:', 'userId : ', userId);
   });
-  const port = process.env.PORT || 3000;
 
-  app.use(express.static(path.resolve('./public')));
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: false }));
-  app.use(cookieParser());
-
-  mongoose.connect(process.env.MONGO_URL).then(e => console.log('mongodb connected'));
-
-  server.listen(port, () => {
-    console.log(`listening on *:${port}`);
+  socket.on('private-message', ({ to, from, message }) => {
+    const targetId = users[to];
+    if (targetId) {
+      io.to(targetId).emit('private-message', { from, message });
+    }
   });
 
-  io.on('connection', (socket) => {
-    console.log('a user connected');
-    socket.join('some room');
-    // broadcast to all connected clients in the room
-    io.to('some room').emit('chat message', 'world');
-    io.except('some room').emit('chat message', 'random');
-    socket.leave('some room');
-    socket.on('disconnect', () => {
-      console.log('user disconnected');
-    });
-    socket.on('chat message', (msg) => {
-      console.log(msg);
-      io.emit('chat message', msg);
-    });
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+    for (let userId in users) {
+      if (users[userId] === socket.id) {
+        delete users[userId];
+        break;
+      }
+    }
   });
+});
 
-  app.use('/user', userRoutes);
-  app.use('/api', apiRoutes);
+app.use('/user', restrictToLoggedinUserOnly,userRoutes);
+app.use('/api', apiRoutes);
 
-  app.get('/', restrictToLoggedinUserOnly, (req, res) => {
-    res.sendFile('./public/index.html');
-  });
-}
+app.get('/', (req, res) => res.send('hi'));

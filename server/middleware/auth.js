@@ -6,7 +6,7 @@ async function restrictToLoggedinUserOnly(req,res,next) {
     const user=getUser(userUid)
     if(!user) return redirect('/user/login')
         req.user=user
-        next()
+        return next()
 }
 
 module.exports={

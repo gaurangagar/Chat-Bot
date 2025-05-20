@@ -11,7 +11,6 @@ const cors = require('cors');
 
 const userRoutes = require('./routes/user.routes');
 const apiRoutes = require('./routes/api.routes');
-const { restrictToLoggedinUserOnly } = require('./middleware/auth');
 
 const app = express();
 app.use(cors({
@@ -33,10 +32,6 @@ app.use(express.static(path.resolve('./public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-}));
 
 mongoose.connect(process.env.MONGO_URL).then(e => console.log('mongodb connected'));
 
@@ -72,7 +67,7 @@ io.on('connection', (socket) => {
   });
 });
 
-app.use('/user', restrictToLoggedinUserOnly,userRoutes);
+app.use('/user', userRoutes);
 app.use('/api', apiRoutes);
 
 app.get('/', (req, res) => res.send('hi'));

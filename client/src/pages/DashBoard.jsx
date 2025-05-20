@@ -1,8 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useContext,useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'
+
 import SearchBar from '../components/SearchBar';
 import ChatBox from '../components/ChatBox';
+import { CurrentUserDataContext } from '../context/CurrentUserContext';
 
 const DashBoard = () => {
+  const navigate = useNavigate();
+  const {user, setUser}=useContext(CurrentUserDataContext)
+
+  useEffect(() => {
+    if (!user) {
+      return navigate('/signin');
+    }
+  }, [user]);
+
   return (
     <div className='h-screen flex flex-col'>
       <h1>DashBoard</h1>

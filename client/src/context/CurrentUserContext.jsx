@@ -1,19 +1,31 @@
 import React, { createContext, useEffect, useState } from 'react'
+import axios from 'axios'
 
-export const CurrentUserDataContext=createContext()
+export const CurrentUserDataContext = createContext()
 
-const CurrentUserProvider = ({children}) => {
+const CurrentUserProvider = ({ children }) => {
+  const [user, setUser] = useState(null)
 
-    const [currentUser, setcurrentUser] = useState({})
-
-    useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/CurrentUser`,{
+        withCredentials: true
+      })
+      setUser(response.data)
       
-      const user=localStorage.getItem('user')
-      if(user) setcurrentUser(JSON.parse(user))
-    }, [])
-    
+    } catch (error) {
+      console.log(error)
+      setUser(null)
+      console.error('Failed to fetch user:', error.response?.data || error.message)
+    }
+  }
+
+  useEffect(() => {
+    fetchUser()
+  }, [])
+
   return (
-    <CurrentUserDataContext.Provider value={{ currentUser, setcurrentUser }}>
+    <CurrentUserDataContext.Provider value={{ user, setUser }}>
       {children}
     </CurrentUserDataContext.Provider>
   )

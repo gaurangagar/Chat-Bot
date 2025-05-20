@@ -48,7 +48,11 @@ async function handleUserLogin(req, res) {
     }
     const sessionId = uuidv4();
     setUser(sessionId, user);
-    res.cookie('uid', sessionId);
+    res.cookie('uid', sessionId, {
+    httpOnly: true,
+    secure: false, // set to true in production (HTTPS)
+    sameSite: 'lax'
+});
     return res.send('user login done');
 }
 

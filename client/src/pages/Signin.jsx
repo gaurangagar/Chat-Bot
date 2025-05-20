@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { CurrentUserDataContext } from '../context/CurrentUserContext';
 
 const Signin = () => {
+    const navigate = useNavigate();
+    const { user, setUser } = useContext(CurrentUserDataContext);
+
+    useEffect(() => {
+        if (user) {
+            return navigate('/dashboard');
+        }
+    }, [user]);
+
     const [email, setemail] = useState('');
     const [password, setpassword] = useState('');
-
-    const navigate = useNavigate();
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -15,11 +23,16 @@ const Signin = () => {
             password: password,
         };
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/login`, user);
+            const response = await axios.post(
+                `${import.meta.env.VITE_BASE_URL}/user/login`,
+                user,
+                { withCredentials: true }
+            );
             console.log(response);
             navigate('/dashboard');
             setemail('');
             setpassword('');
+            console.log('logged in');
         } catch (error) {
             console.error('Login failed:', error);
         }

@@ -1,4 +1,4 @@
-import { useContext,useEffect } from 'react';
+import { useContext,useEffect,useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 
 import SearchBar from '../components/SearchBar';
@@ -8,6 +8,7 @@ import { CurrentUserDataContext } from '../context/CurrentUserContext';
 const DashBoard = () => {
   const navigate = useNavigate();
   const {user, setUser}=useContext(CurrentUserDataContext)
+  const [userToChat, setuserToChat] = useState({})
 
   useEffect(() => {
     if (!user) {
@@ -22,11 +23,15 @@ const DashBoard = () => {
         <div className='w-[30%] border-2 rounded-md'>
           <div className='flex justify-between items-center p-2'>
             <h1>Chats</h1>
-            <SearchBar />
+            <SearchBar setuserToChat={setuserToChat} />
           </div>
         </div>
         <div className='w-[70%] border-2 rounded-md p-4'>
-          <ChatBox />
+          {userToChat && Object.keys(userToChat).length > 0 ? (
+            <ChatBox userToChat={userToChat} />
+          ) : (
+            <div>choose person to chat</div>
+          )}
         </div>
       </div>
     </div>

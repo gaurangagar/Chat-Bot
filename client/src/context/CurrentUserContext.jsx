@@ -12,7 +12,6 @@ const CurrentUserProvider = ({ children }) => {
         withCredentials: true
       })
       setUser(response.data)
-      
     } catch (error) {
       console.log(error)
       setUser(null)
@@ -23,6 +22,7 @@ const CurrentUserProvider = ({ children }) => {
   useEffect(() => {
     fetchUser()
   }, [])
+  
 
   return (
     <CurrentUserDataContext.Provider value={{ user, setUser }}>

@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useContext } from 'react';
 import io from 'socket.io-client';
+
+import { CurrentUserDataContext } from '../context/CurrentUserContext';
 
 const socket = io('http://localhost:8000');
 
-function chatBox() {
-  const [userId, setUserId] = useState('');
+function chatBox({userToChat}) {
+  const {user, setUser}=useContext(CurrentUserDataContext)
   const [recipientId, setRecipientId] = useState('');
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
 
   useEffect(() => {
   socket.connect();
-
+    handleRegister();
   const handlePrivateMessage = ({ from, message }) => {
     setChat((prev) => [...prev, `From ${from}: ${message}`]);
   };
@@ -28,11 +30,16 @@ function chatBox() {
   };
 }, []);
 
+useEffect(() => {
+    setChat([])
+  
+  }, [userToChat])
+
 
   const handleRegister = () => {
-    if (userId) {
-      socket.emit('register', userId);
-      console.log('Registering user:', userId);
+    if (user?.userName) {
+      socket.emit('register', user.userName);
+      console.log('Registering user:', user.userName);
     }else {
     console.log('Please enter your User ID to register');
   }
@@ -40,33 +47,19 @@ function chatBox() {
 
   const sendMessage = () => {
     socket.emit('private-message', {
-      to: recipientId,
-      from: userId,
+      to: userToChat.userName,
+      from: user.userName,
       message,
     });
-    setChat((prev) => [...prev, `To ${recipientId}: ${message}`]);
+    setChat((prev) => [...prev, `To ${userToChat.userName}: ${message}`]);
     setMessage('');
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className='p-5'>
       <h2>Private Chat</h2>
 
-      <div>
-        <input
-          placeholder="Your User ID"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-        />
-        <button onClick={handleRegister}>Register</button>
-      </div>
-
-      <div style={{ marginTop: '10px' }}>
-        <input
-          placeholder="Recipient ID"
-          value={recipientId}
-          onChange={(e) => setRecipientId(e.target.value)}
-        />
+      <div className='mt-2.5'>
         <input
           placeholder="Message"
           value={message}
@@ -75,8 +68,11 @@ function chatBox() {
         <button onClick={sendMessage}>Send</button>
       </div>
 
-      <div style={{ marginTop: '20px' }}>
-        <h4>Chat Log</h4>
+      <div className='mt-5'>
+        <div className='flex'>
+          <h4>Chat Log: </h4>
+          <h4>You are chatting to {userToChat.userName}</h4>
+        </div>
         {chat.map((msg, index) => (
           <div key={index}>{msg}</div>
         ))}

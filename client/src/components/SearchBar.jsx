@@ -2,16 +2,13 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CurrentUserDataContext } from '../context/CurrentUserContext';
 
-const SearchBar = () => {
+const SearchBar = ({setuserToChat}) => {
   const [allUsers, setallUsers] = useState([]);
-  const context = useContext(CurrentUserDataContext);
-  const { currentUser, setcurrentUser } = context;
-
+  const {user, setUser}=useContext(CurrentUserDataContext)
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_BASE_URL}/api/allusers`)
       .then((response) => {
-        console.log(response.data);
         setallUsers(response.data);
       })
       .catch((error) => {
@@ -20,14 +17,14 @@ const SearchBar = () => {
   }, []);
 
   const [searchText, setSearchText] = useState('');
-  const filteredUsers = allUsers?.filter(user =>
-    user.fullName.firstName.toLowerCase().includes(searchText.toLowerCase())
+  const filteredUsers = allUsers?.filter(u =>
+    user.userName!=u.userName &&
+    u.fullName.firstName.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const handleSetCurrentUser = (user) => {
-    setcurrentUser(user);
-    localStorage.setItem('user',JSON.stringify(user))
-    console.log('Current user set to:', user);
+    setuserToChat(user)
+    console.log('user to chat set to:', user);
   };
 
   return (

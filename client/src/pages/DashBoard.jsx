@@ -18,7 +18,10 @@ const DashBoard = () => {
 
   return (
     <div className='h-screen flex flex-col'>
-      <h1>DashBoard</h1>
+      <div className='flex'>
+        <h1>DashBoard</h1>
+        
+      </div>
       <div className='flex items-stretch justify-between h-[90%]'>
         <div className='w-[30%] border-2 rounded-md'>
           <div className='flex justify-between items-center p-2'>

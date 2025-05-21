@@ -4,31 +4,30 @@ const mongoose = require('mongoose');
 const path = require('path');
 const { Server } = require("socket.io");
 require('dotenv').config();
-const { availableParallelism } = require('node:os');
 const cluster = require('node:cluster');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const userRoutes = require('./routes/user.routes');
 const apiRoutes = require('./routes/api.routes');
+const messageRoutes=require('./routes/message.route')
 
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:5173', // Allow frontend access
-  credentials: true,               // Allow cookies/auth headers if needed
+  origin: 'http://localhost:5173',
+  credentials: true,
 }));
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",  // <-- your React app URL
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"],
     credentials: true
   }
 });
 const port = process.env.PORT || 3000;
 
-app.use(express.static(path.resolve('./public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -69,5 +68,6 @@ io.on('connection', (socket) => {
 
 app.use('/user', userRoutes);
 app.use('/api', apiRoutes);
+app.use('/message',messageRoutes)
 
 app.get('/', (req, res) => res.send('hi'));

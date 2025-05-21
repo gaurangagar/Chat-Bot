@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const User = require('../models/user');
-const { getUser, setUser } = require('../service/auth.service');
+const { getUser, setUser,deleteUser } = require('../service/auth.service');
 const bcrypt = require("bcrypt");
 
 async function handleUserSignup(req, res) {
@@ -50,13 +50,23 @@ async function handleUserLogin(req, res) {
     setUser(sessionId, user);
     res.cookie('uid', sessionId, {
     httpOnly: true,
-    secure: false, // set to true in production (HTTPS)
+    secure: false,
     sameSite: 'lax'
 });
     return res.send('user login done');
 }
 
+async function handleUserLogout(req,res) {
+    const sessionId = req.cookies.uid;
+    if (sessionId) {
+        deleteUser(sessionId);
+        res.clearCookie('uid');
+    }
+    res.send('user logged out');
+}
+
 module.exports = {
     handleUserSignup,
-    handleUserLogin
+    handleUserLogin,
+    handleUserLogout
 };

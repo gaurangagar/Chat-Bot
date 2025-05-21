@@ -13,7 +13,7 @@ const CurrentUserProvider = ({ children }) => {
       })
       setUser(response.data)
     } catch (error) {
-      console.log(error)
+      console.log('hi',error)
       setUser(null)
       console.error('Failed to fetch user:', error.response?.data || error.message)
     }

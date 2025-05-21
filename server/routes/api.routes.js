@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { getAllUsers,getCurrentUser } = require('../controllers/api');
+const { getAllUsers,getCurrentUser } = require('../controllers/api.controller');
 
 const router = express.Router();
 

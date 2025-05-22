@@ -51,6 +51,7 @@ async function handleUserLogin(req, res) {
     res.cookie('uid', sessionId, {
     httpOnly: true,
     secure: false,
+    sameSite:'Lax'
 });
     return res.send('user login done');
 }

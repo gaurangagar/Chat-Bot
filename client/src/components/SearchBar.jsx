@@ -18,7 +18,7 @@ const SearchBar = ({setuserToChat}) => {
 
   const [searchText, setSearchText] = useState('');
   const filteredUsers = allUsers?.filter(u =>
-    user.userName!=u.userName &&
+    user?.userName!=u.userName &&
     u.fullName.firstName.toLowerCase().includes(searchText.toLowerCase())
   );
 

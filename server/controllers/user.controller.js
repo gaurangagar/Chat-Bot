@@ -51,7 +51,6 @@ async function handleUserLogin(req, res) {
     res.cookie('uid', sessionId, {
     httpOnly: true,
     secure: false,
-    sameSite: 'lax'
 });
     return res.send('user login done');
 }
@@ -61,6 +60,7 @@ async function handleUserLogout(req,res) {
     if (sessionId) {
         deleteUser(sessionId);
         res.clearCookie('uid');
+        console.log('cookie cleared')
     }
     res.send('user logged out');
 }

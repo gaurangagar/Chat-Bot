@@ -9,15 +9,15 @@ const Signin = () => {
 
     useEffect(() => {
         if (user) {
-            return navigate('/dashboard');
+            navigate('/dashboard');
         }
-    }, [user]);
+    }, [user,setUser]);
 
     const [email, setemail] = useState('');
     const [password, setpassword] = useState('');
 
     const submitHandler = async (e) => {
-        e.preventDefault();
+        //e.preventDefault();
         const user = {
             email: email,
             password: password,
@@ -29,10 +29,10 @@ const Signin = () => {
                 { withCredentials: true }
             );
             console.log(response);
-            navigate('/dashboard');
             setemail('');
             setpassword('');
             console.log('logged in');
+            navigate('/dashboard');
         } catch (error) {
             console.error('Login failed:', error);
         }

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar';
 import ChatBox from '../components/ChatBox';
 import { CurrentUserDataContext } from '../context/CurrentUserContext';
+import axios from 'axios';
 
 const DashBoard = () => {
   const navigate = useNavigate();
@@ -16,11 +17,25 @@ const DashBoard = () => {
     }
   }, [user]);
 
+  const LogoutHandler = (e) => {
+    axios
+      .get(`${import.meta.env.VITE_BASE_URL}/user/logout`)
+      .then((response) => {
+        setUser(null);
+        console.log('logged out', response.data);
+      })
+      .catch((error) => {
+        console.log('Error logging out', error);
+      });
+  };
+
   return (
     <div className='h-screen flex flex-col'>
-      <div className='flex'>
+      <div className='flex items-end justify-between'>
         <h1>DashBoard</h1>
-        
+        <button
+          onClick={LogoutHandler}
+        >Log Out</button>
       </div>
       <div className='flex items-stretch justify-between h-[90%]'>
         <div className='w-[30%] border-2 rounded-md'>

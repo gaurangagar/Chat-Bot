@@ -113,11 +113,11 @@ function chatBox({ userToChat }) {
       <div className='mt-5'>
         <div className='flex'>
           <h4>Chat Log: </h4>
-          <h4>You are chatting to {userToChat.userName}</h4>
+          <h4>You are chatting to {userToChat?.userName}</h4>
         </div>
         {chat.map((msg, index) => (
           <div key={index}>
-    <strong>{msg.from === user.userName ? 'You' : msg.from}:</strong> {msg.message}
+    <strong>{msg.from === user?.userName ? 'You' : msg.from}:</strong> {msg.message}
   </div>
         ))}
       </div>

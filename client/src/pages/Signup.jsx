@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,Link } from 'react-router-dom';
 import axios from 'axios';
 import { CurrentUserDataContext } from '../context/CurrentUserContext';
 
@@ -18,6 +18,7 @@ const Signup = () => {
     const [firstName, setfirstName] = useState('');
     const [lastName, setlastName] = useState('');
     const [userName, setuserName] = useState('');
+    const [error, seterror] = useState('');
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -37,18 +38,31 @@ const Signup = () => {
             );
             console.log(response);
             navigate('/dashboard');
+        } catch (error) {
+            console.error('Signup failed:', error);
+            if (error.response?.data?.message) {
+                seterror(error.response.data.message);
+            } else {
+                seterror('Something went wrong. Please try again.');
+            }
+        } finally {
             setemail('');
             setpassword('');
             setfirstName('');
             setlastName('');
             setuserName('');
-        } catch (error) {
-            console.error('Signup failed:', error);
         }
     };
 
     return (
         <div>
+            <div className='flex items-end justify-center underline'>
+                <h1>ChatBot</h1>
+            </div>
+            <div className='flex items-end justify-center'>
+                <h3>Please enter your details to register!</h3>
+            </div>
+            {error && <div className="flex items-end justify-center underline-offset-0">{error}</div>}
             <form onSubmit={submitHandler}>
                 <div className="mb-3">
                     <label htmlFor="exampleInputName" className="form-label">
@@ -99,7 +113,7 @@ const Signup = () => {
                 </div>
                 <div className="mb-3">
                     <label htmlFor="exampleInputUserName" className="form-label">
-                        UserName
+                        Username
                     </label>
                     <input
                         type="text"
@@ -125,10 +139,16 @@ const Signup = () => {
                         }}
                     />
                 </div>
-                <button type="submit" className="btn btn-primary">
-                    Submit
-                </button>
+                <div className='flex justify-center'>
+                    <button type="submit" className="btn btn-primary">
+                        Submit
+                    </button>
+                </div>
             </form>
+            <div className='flex gap-2 justify-center mt-3'>
+                <p>Already registered....</p>
+                <Link to="/signin"> Login Here</Link>
+            </div>
         </div>
     );
 };

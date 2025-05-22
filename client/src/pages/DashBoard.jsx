@@ -19,7 +19,7 @@ const DashBoard = () => {
 
   const LogoutHandler = (e) => {
     axios
-      .get(`${import.meta.env.VITE_BASE_URL}/user/logout`)
+      .post(`${import.meta.env.VITE_BASE_URL}/user/logout`,{},{ withCredentials: true })
       .then((response) => {
         setUser(null);
         console.log('logged out', response.data);

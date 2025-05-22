@@ -32,8 +32,10 @@ async function handleUserSignup(req, res) {
 
         const sessionId = uuidv4();
         setUser(sessionId, user);
-        res.cookie('uid', sessionId);
-        return res.send('user created');
+        res.cookie('uid', sessionId),{
+            httpOnly: true,
+        };
+        return res.status(201).json({ message: "User created successfully" });
     } catch (error) {
         console.error("Signup Error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
@@ -44,14 +46,14 @@ async function handleUserLogin(req, res) {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await bcrypt.compare(password, user.password))) {
-        return res.status(401).send("Wrong credentials");
+        return res.status(401).json({message:"Wrong credentials"});
     }
     const sessionId = uuidv4();
     setUser(sessionId, user);
     res.cookie('uid', sessionId, {
     httpOnly: true,
     secure: false,
-    sameSite:'Lax'
+    sameSite:'lax'
 });
     return res.send('user login done');
 }
@@ -60,7 +62,11 @@ async function handleUserLogout(req,res) {
     const sessionId = req.cookies.uid;
     if (sessionId) {
         deleteUser(sessionId);
-        res.clearCookie('uid');
+        res.clearCookie('uid',{
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+        });
         console.log('cookie cleared')
     }
     res.send('user logged out');

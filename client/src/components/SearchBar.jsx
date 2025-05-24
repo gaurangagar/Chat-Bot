@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CurrentUserDataContext } from '../context/CurrentUserContext';
+import StatusIndicator from './StatusIndicator';
 
 const SearchBar = ({setuserToChat}) => {
   const [allUsers, setallUsers] = useState([]);
@@ -48,11 +49,14 @@ const SearchBar = ({setuserToChat}) => {
         ) : (
           filteredUsers.map((user, index) => (
             <li key={index}>
-              <button
+              <div className='flex items-center space-x-1'>
+                <button
                 onClick={() => handleSetCurrentUser(user)}
-                className={`w-full text-left px-2 py-1 rounded transition 
+                className={`text-left px-2 py-1 rounded transition 
                   ${selectedUser === user._id ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}
               >{user.fullName.firstName}</button>
+              <StatusIndicator online={user.isOnline}/>
+              </div>
             </li>
           ))
         )}

@@ -29,8 +29,13 @@ const userSchema=new Schema({
         required:true,
         select:false
     },
-    socketId:{
-        type:String,
+    isOnline: {
+        type: Boolean,
+        default: true,
+    },
+    lastSeen: {
+        type: String,
+        default: null,
     }
 },{timestamps:true})
 

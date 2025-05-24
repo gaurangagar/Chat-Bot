@@ -27,6 +27,9 @@ async function getCurrentUser(req, res) {
     fullName: user.fullName,
     userName: user.userName,
     email: user.email,
+    isOnline: user.isOnline,
+    lastSeen: user.lastSeen,
+
   });
 }
 

@@ -48,19 +48,39 @@ async function handleUserLogin(req, res) {
     if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(401).json({message:"Wrong credentials"});
     }
+    user.isOnline = true;
+    user.lastSeen = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+    await user.save();
     const sessionId = uuidv4();
     setUser(sessionId, user);
     res.cookie('uid', sessionId, {
-    httpOnly: true,
-    secure: false,
-    sameSite:'lax'
-});
+        httpOnly: true,
+        secure: false,
+        sameSite:'lax'
+    });
+
     return res.send('user login done');
 }
 
 async function handleUserLogout(req,res) {
     const sessionId = req.cookies.uid;
     if (sessionId) {
+        const user=getUser(sessionId)
+        if(user && user._id) {
+            try{
+                await User.findByIdAndUpdate(user._id,{
+                    isOnline:false,
+                    lastSeen: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+            })
+            console.log('logout process')
+            } catch(err) {
+                console.log(err);
+            } finally{
+                console.log('user last seen updated',user)
+            }
+        } else {
+            console.log('no user')
+        }
         deleteUser(sessionId);
         res.clearCookie('uid',{
             httpOnly: true,
@@ -68,6 +88,8 @@ async function handleUserLogout(req,res) {
             sameSite: 'lax',
         });
         console.log('cookie cleared')
+    } else {
+        console.log('no session id')
     }
     res.send('user logged out');
 }

@@ -17,14 +17,14 @@ function chatBox({ userToChat }) {
     handleRegister();
     const handlePrivateMessage = ({ from, message }) => {
       setChat((prev) => [
-    ...prev,
-    {
-      from: userToChat.userName,
-      to: user.userName,
-      message,
-      timestamp: new Date().toISOString(),
-    },
-  ]);
+        ...prev,
+        {
+          from: userToChat.userName,
+          to: user.userName,
+          message,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     };
 
     socket.on('connect', () => {
@@ -51,7 +51,7 @@ function chatBox({ userToChat }) {
       })
       .then((response) => {
         setChat(response.data);
-        console.log(response.data)
+        console.log(response.data);
       })
       .catch((error) => {
         console.log('Error fetching messages:', error);
@@ -68,7 +68,7 @@ function chatBox({ userToChat }) {
   };
 
   const sendMessage = () => {
-    if(!message) return;
+    if (!message) return;
     socket.emit('private-message', {
       to: userToChat.userName,
       from: user.userName,
@@ -86,15 +86,15 @@ function chatBox({ userToChat }) {
       .catch((error) => {
         console.log('message not created in database', error);
       });
-    setChat((prev) =>[
-    ...prev,
-    {
-      from: user.userName,
-      to: userToChat.userName,
-      message,
-      timestamp: new Date().toISOString(),
-    },
-  ]);
+    setChat((prev) => [
+      ...prev,
+      {
+        from: user.userName,
+        to: userToChat.userName,
+        message,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
     setMessage('');
   };
 
@@ -108,28 +108,36 @@ function chatBox({ userToChat }) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <button 
-        onClick={sendMessage}
-        className="bg-blue-500 text-white px-4 py-2 text-sm rounded-r-lg hover:bg-blue-600 transition-colors"
-        >Send</button>
+        <button
+          onClick={sendMessage}
+          className="bg-blue-500 text-white px-4 py-2 text-sm rounded-r-lg hover:bg-blue-600 transition-colors"
+        >
+          Send
+        </button>
       </div>
 
       <div className='mt-5'>
         <div className='flex'>
-          <h4>Chat Log: </h4>
+          <h4>Chat Log : </h4>
           <h4>You are chatting to {userToChat?.userName}</h4>
         </div>
-        <div className="flex-grow overflow-y-auto bg-gray-50 p-3 space-y-2 rounded border" style={{ maxHeight: '50vh' }}>
+        {userToChat.isOnline ? <p>{userToChat.userName} is online </p> : <p>Last Seen : {userToChat.lastSeen}.</p>}
+        {chat.length>0 && 
+        <div
+          className="flex-grow overflow-y-auto bg-gray-50 p-3 space-y-2 rounded border"
+          style={{ maxHeight: '50vh' }}
+        >
           {chat.map((msg, index) => (
-            <div 
-            key={index}
-          className={`p-2 rounded text-sm ${
-          index % 2 === 0 ? 'bg-white' : 'bg-gray-100'
-        }`}>
-    <strong>{msg.from === user?.userName ? 'You' : msg.from}:</strong> {msg.message}
-  </div>
-        ))}
-        </div>
+            <div
+              key={index}
+              className={`p-2 rounded text-sm ${
+                index % 2 === 0 ? 'bg-white' : 'bg-gray-100'
+              }`}
+            >
+              <strong>{msg.from === user?.userName ? 'You' : msg.from}:</strong> {msg.message}
+            </div>
+          ))}
+        </div>}
       </div>
     </div>
   );

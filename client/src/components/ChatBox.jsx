@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import io from 'socket.io-client';
 import axios from 'axios';
 
@@ -11,6 +11,7 @@ function chatBox({ userToChat }) {
   const [recipientId, setRecipientId] = useState('');
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     socket.connect();
@@ -42,6 +43,12 @@ function chatBox({ userToChat }) {
   useEffect(() => {
     setChat([]);
   }, [userToChat]);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chat]);
 
   useEffect(() => {
     axios
@@ -121,23 +128,29 @@ function chatBox({ userToChat }) {
           <h4>Chat Log : </h4>
           <h4>You are chatting to {userToChat?.userName}</h4>
         </div>
-        {userToChat.isOnline ? <p>{userToChat.userName} is online </p> : <p>Last Seen : {userToChat.lastSeen}.</p>}
-        {chat.length>0 && 
-        <div
-          className="flex-grow overflow-y-auto bg-gray-50 p-3 space-y-2 rounded border"
-          style={{ maxHeight: '50vh' }}
-        >
-          {chat.map((msg, index) => (
-            <div
-              key={index}
-              className={`p-2 rounded text-sm ${
-                index % 2 === 0 ? 'bg-white' : 'bg-gray-100'
-              }`}
-            >
-              <strong>{msg.from === user?.userName ? 'You' : msg.from}:</strong> {msg.message}
-            </div>
-          ))}
-        </div>}
+        {userToChat.isOnline ? (
+          <p>{userToChat.userName} is online </p>
+        ) : (
+          <p>Last Seen : {userToChat.lastSeen}.</p>
+        )}
+        {chat.length > 0 && (
+          <div
+            className="flex-grow overflow-y-auto bg-gray-50 p-3 space-y-2 rounded border"
+            style={{ maxHeight: '45vh' }}
+            ref={chatContainerRef}
+          >
+            {chat.map((msg, index) => (
+              <div
+                key={index}
+                className={`p-2 rounded text-sm ${
+                  index % 2 === 0 ? 'bg-white' : 'bg-gray-100'
+                }`}
+              >
+                <strong>{msg.from === user?.userName ? 'You' : msg.from}:</strong> {msg.message}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import io from 'socket.io-client';
 import axios from 'axios';
+import socket from '../utils/socket'
 
 import { CurrentUserDataContext } from '../context/CurrentUserContext';
 
-const socket = io('http://localhost:8000');
+function ChatBox({ userToChat }) {
 
-function chatBox({ userToChat }) {
   const { user, setUser } = useContext(CurrentUserDataContext);
-  const [recipientId, setRecipientId] = useState('');
+
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
   const chatContainerRef = useRef(null);
@@ -75,7 +74,7 @@ function chatBox({ userToChat }) {
   };
 
   const sendMessage = () => {
-    if (!message) return;
+    if (!message.trim()) return;
     socket.emit('private-message', {
       to: userToChat.userName,
       from: user.userName,
@@ -156,4 +155,4 @@ function chatBox({ userToChat }) {
   );
 }
 
-export default chatBox;
+export default ChatBox;

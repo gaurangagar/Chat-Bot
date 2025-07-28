@@ -17,7 +17,16 @@ app.use(cors({
   credentials: true,
 }));
 
+const port = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+connectDB()
+
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: process.env.VITE_URL,
@@ -27,14 +36,6 @@ const io = new Server(server, {
 });
 
 socketSetUp(io);
-
-const port = process.env.PORT || 3000;
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-
-connectDB()
 
 server.listen(port, () => {
   console.log(`listening on *:${port}`);

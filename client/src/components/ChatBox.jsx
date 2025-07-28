@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 import socket from '../utils/socket'
+import { Paperclip } from 'lucide-react';
 
 import { CurrentUserDataContext } from '../context/CurrentUserContext';
 
@@ -105,22 +106,7 @@ function ChatBox({ userToChat }) {
   };
 
   return (
-    <div className='p-4 max-w-full mx-auto flex flex-col h-[80vh] min-h-[400px] border rounded shadow-md'>
-      <h2>Private Chat</h2>
-      <div className='mt-2.5'>
-        <input
-          placeholder="Type your message"
-          className="flex-grow resize-none border rounded-l-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <button
-          onClick={sendMessage}
-          className="bg-blue-500 text-white px-4 py-2 text-sm rounded-r-lg hover:bg-blue-600 transition-colors"
-        >
-          Send
-        </button>
-      </div>
+    <div className='p-2 max-w-full mx-auto flex flex-col h-[80vh] min-h-[400px] border rounded shadow-md'>
 
       <div className='mt-5'>
         <div className='flex'>
@@ -142,7 +128,7 @@ function ChatBox({ userToChat }) {
               <div
                 key={index}
                 className={`p-2 rounded text-sm ${
-                  index % 2 === 0 ? 'bg-white' : 'bg-gray-100'
+                  index % 2 === 0 ? 'bg-white text-left' : 'bg-gray-100 text-right'
                 }`}
               >
                 <strong>{msg.from === user?.userName ? 'You' : msg.from}:</strong> {msg.message}
@@ -151,6 +137,24 @@ function ChatBox({ userToChat }) {
           </div>
         )}
       </div>
+
+      <div className='mt-2.5 flex'>
+        <input
+          placeholder="Type your message"
+          className="w-[95%] flex-grow resize-none border rounded-l-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <div
+        className=''><Paperclip /></div>
+        <button
+          onClick={sendMessage}
+          className="bg-blue-500 text-white px-4 py-2 text-sm rounded-r-lg hover:bg-blue-600 transition-colors"
+        >
+          Send
+        </button>
+      </div>
+      
     </div>
   );
 }

@@ -37,7 +37,6 @@ async function handleUserSignup(req, res) {
         };
         return res.status(201).json({ message: "User created successfully" });
     } catch (error) {
-        console.error("Signup Error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
@@ -72,14 +71,7 @@ async function handleUserLogout(req,res) {
                     isOnline:false,
                     lastSeen: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
             })
-            console.log('logout process')
-            } catch(err) {
-                console.log(err);
-            } finally{
-                console.log('user last seen updated',user)
-            }
-        } else {
-            console.log('no user')
+            } catch (err) {}
         }
         deleteUser(sessionId);
         res.clearCookie('uid',{
@@ -87,9 +79,6 @@ async function handleUserLogout(req,res) {
             secure: false,
             sameSite: 'lax',
         });
-        console.log('cookie cleared')
-    } else {
-        console.log('no session id')
     }
     res.send('user logged out');
 }

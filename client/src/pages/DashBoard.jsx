@@ -22,11 +22,8 @@ const DashBoard = () => {
       .post(`${import.meta.env.VITE_BASE_URL}/user/logout`,{},{ withCredentials: true })
       .then((response) => {
         setUser(null);
-        console.log('logged out', response.data);
       })
-      .catch((error) => {
-        console.log('Error logging out', error);
-      });
+      .catch(() =>null);
   };
 
   return (
@@ -54,11 +51,10 @@ const DashBoard = () => {
           ) : (
             <div className="flex items-center justify-center h-full bg-gray-50">
               <div className="text-center p-6 bg-white rounded-2xl shadow-md">
-              <h3 className="text-xl font-semibold mb-2">Online Chatting Bot</h3>
-              <p className="text-gray-600">Select a chat to start messaging</p>
+                <h3 className="text-xl font-semibold mb-2">Online Chatting Bot</h3>
+                <p className="text-gray-600">Select a chat to start messaging</p>
+              </div>
             </div>
-</div>
-
           )}
         </div>
       </div>

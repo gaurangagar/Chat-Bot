@@ -11,7 +11,6 @@ async function getMessages(req, res) {
         }).sort({ timestamp: 1 });
         res.status(200).json(messages);
     } catch (err) {
-        console.log(err);
         res.status(500).json({ err });
     }
 }
@@ -24,10 +23,8 @@ async function createMessage(req, res) {
             to,
             message
         });
-        console.log(messagecreated)
         res.status(201).json({ success: true, message });
     } catch (err) {
-        console.log(err);
         res.status(500).json({ err });
     }
 }

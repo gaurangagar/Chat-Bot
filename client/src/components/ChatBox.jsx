@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 import socket from '../utils/socket'
-import { Paperclip } from 'lucide-react';
-
+import ChatInput from './ChatInput';
+import { sendMessage } from '../utils/sendMessage';
 import { CurrentUserDataContext } from '../context/CurrentUserContext';
 
 function ChatBox({ userToChat }) {
@@ -12,33 +12,45 @@ function ChatBox({ userToChat }) {
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
   const chatContainerRef = useRef(null);
+  const [isTyping, setisTyping] = useState(false)
+  const typingTimeoutRef = useRef(null);
+
+  const handlePrivateMessage = ({ from, message }) => {
+    setChat((prev) => [
+      ...prev,
+      {
+        from: userToChat.userName,
+        to: user.userName,
+        message,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+  };
+
+  const handleTyping=({from})=>{
+    if(from===userToChat.userName) {
+      setisTyping(true)
+      if(typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+      typingTimeoutRef.current = setTimeout(() => {
+        setisTyping(false);
+      }, 2000);
+    }
+  }
 
   useEffect(() => {
     socket.connect();
     handleRegister();
-    const handlePrivateMessage = ({ from, message }) => {
-      setChat((prev) => [
-        ...prev,
-        {
-          from: userToChat.userName,
-          to: user.userName,
-          message,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-    };
-
-    socket.on('connect', () => {
-      console.log('Connected to server:', socket.id);
-    });
+    
+    socket.on('typing',handleTyping)
 
     socket.on('private-message', handlePrivateMessage);
 
     return () => {
       socket.off('private-message', handlePrivateMessage);
+      socket.off('typing',handleTyping)
       socket.disconnect();
     };
-  }, []);
+  }, [userToChat]);
 
   useEffect(() => {
     setChat([]);
@@ -58,56 +70,22 @@ function ChatBox({ userToChat }) {
       })
       .then((response) => {
         setChat(response.data);
-        console.log(response.data);
       })
-      .catch((error) => {
-        console.log('Error fetching messages:', error);
-      });
+      .catch(() => null);
   }, [userToChat]);
 
   const handleRegister = () => {
     if (user?.userName) {
       socket.emit('register', user.userName);
-      console.log('Registering user:', user.userName);
-    } else {
-      console.log('Please enter your User ID to register');
     }
   };
 
-  const sendMessage = () => {
-    if (!message.trim()) return;
-    socket.emit('private-message', {
-      to: userToChat.userName,
-      from: user.userName,
-      message,
-    });
-    axios
-      .post(`${import.meta.env.VITE_BASE_URL}/message/createMessage`, {
-        from: user.userName,
-        to: userToChat?.userName,
-        message: message,
-      })
-      .then((response) => {
-        console.log('message created in database');
-      })
-      .catch((error) => {
-        console.log('message not created in database', error);
-      });
-    setChat((prev) => [
-      ...prev,
-      {
-        from: user.userName,
-        to: userToChat.userName,
-        message,
-        timestamp: new Date().toISOString(),
-      },
-    ]);
-    setMessage('');
+  const handleSendMessage = () => {
+    sendMessage({ message, user, userToChat, setChat, setMessage });
   };
 
   return (
     <div className='p-2 max-w-full mx-auto flex flex-col h-[80vh] min-h-[400px] border rounded shadow-md'>
-
       <div className='mt-5'>
         <div className='flex'>
           <h4>Chat Log : </h4>
@@ -118,6 +96,7 @@ function ChatBox({ userToChat }) {
         ) : (
           <p>Last Seen : {userToChat.lastSeen}.</p>
         )}
+        {isTyping && <p >{userToChat.userName} is typing...</p>}
         {chat.length > 0 && (
           <div
             className="flex-grow overflow-y-auto bg-gray-50 p-3 space-y-2 rounded border"
@@ -138,22 +117,13 @@ function ChatBox({ userToChat }) {
         )}
       </div>
 
-      <div className='mt-2.5 flex'>
-        <input
-          placeholder="Type your message"
-          className="w-[95%] flex-grow resize-none border rounded-l-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <div
-        className=''><Paperclip /></div>
-        <button
-          onClick={sendMessage}
-          className="bg-blue-500 text-white px-4 py-2 text-sm rounded-r-lg hover:bg-blue-600 transition-colors"
-        >
-          Send
-        </button>
-      </div>
+      
+      <ChatInput
+        message={message}
+        setMessage={setMessage}
+        sendMessage={handleSendMessage}
+        onTyping={() => socket.emit('typing', { from: user.userName, to: userToChat.userName })}
+      />
       
     </div>
   );

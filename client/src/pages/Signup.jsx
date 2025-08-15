@@ -36,10 +36,8 @@ const Signup = () => {
                 `${import.meta.env.VITE_BASE_URL}/user/register`,
                 user
             );
-            console.log(response);
             navigate('/dashboard');
         } catch (error) {
-            console.error('Signup failed:', error);
             if (error.response?.data?.message) {
                 seterror(error.response.data.message);
             } else {

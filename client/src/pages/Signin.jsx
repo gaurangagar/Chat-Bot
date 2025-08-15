@@ -29,12 +29,10 @@ const Signin = () => {
                 user,
                 { withCredentials: true }
             );
-            console.log(response);
-            console.log('logged in');
+
             setUser(response.data.user);
             navigate('/dashboard');
         } catch (error) {
-            console.error('Login failed:', error);
             if (error.response?.data?.message) {
                 seterror(error.response.data.message);
             } else {

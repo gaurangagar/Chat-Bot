@@ -32,9 +32,11 @@ async function handleUserSignup(req, res) {
 
         const sessionId = uuidv4();
         setUser(sessionId, user);
-        res.cookie('uid', sessionId),{
+        res.cookie('uid', sessionId,{
             httpOnly: true,
-        };
+            secure: true,
+            sameSite: 'none'
+        });
         return res.status(201).json({ message: "User created successfully" });
     } catch (error) {
         return res.status(500).json({ message: "Internal Server Error" });
@@ -42,45 +44,61 @@ async function handleUserSignup(req, res) {
 }
 
 async function handleUserLogin(req, res) {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+password');
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-        return res.status(401).json({message:"Wrong credentials"});
-    }
-    user.isOnline = true;
-    user.lastSeen = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-    await user.save();
-    const sessionId = uuidv4();
-    setUser(sessionId, user);
-    res.cookie('uid', sessionId, {
-        httpOnly: true,
-        secure: false,
-        sameSite:'lax'
-    });
+    try{
+        const { email, password } = req.body;
+        const user = await User.findOne({ email }).select('+password');
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({message:"Wrong credentials"});
+        }
+        user.isOnline = true;
+        user.lastSeen = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+        await user.save();
+        const sessionId = uuidv4();
+        setUser(sessionId, user);
+        res.cookie('uid', sessionId, {
+            httpOnly: true,
+            secure: true,
+            sameSite:'none'
+        });
+        return res.status(200).json({
+            message: "User login done",
+            user: {
+                id: user._id,
+                email: user.email,
+                userName: user.userName,
+                fullName: user.fullName
+            }
+        });
 
-    return res.send('user login done');
+    } catch(err){
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
 }
 
 async function handleUserLogout(req,res) {
-    const sessionId = req.cookies.uid;
-    if (sessionId) {
-        const user=getUser(sessionId)
-        if(user && user._id) {
-            try{
-                await User.findByIdAndUpdate(user._id,{
-                    isOnline:false,
-                    lastSeen: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-            })
-            } catch (err) {}
+    try{
+        const sessionId = req.cookies.uid;
+        if (sessionId) {
+            const user=getUser(sessionId)
+            if(user && user._id) {
+                try{
+                    await User.findByIdAndUpdate(user._id,{
+                        isOnline:false,
+                        lastSeen: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                })
+                } catch (err) {}
+            }
+            deleteUser(sessionId);
+            res.clearCookie('uid',{
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+            });
         }
-        deleteUser(sessionId);
-        res.clearCookie('uid',{
-            httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
-        });
+        res.send('user logged out');
+    } catch(err) {
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-    res.send('user logged out');
 }
 
 module.exports = {

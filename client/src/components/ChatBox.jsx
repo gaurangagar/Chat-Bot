@@ -103,16 +103,17 @@ function ChatBox({ userToChat }) {
             style={{ maxHeight: '45vh' }}
             ref={chatContainerRef}
           >
-            {chat.map((msg, index) => (
+            {chat.map((msg, index) => 
               <div
                 key={index}
-                className={`p-2 rounded text-sm ${
-                  index % 2 === 0 ? 'bg-white text-left' : 'bg-gray-100 text-right'
-                }`}
+                className={`p-2 rounded text-sm 
+                  ${msg.from === user?.userName ? 'text-right' : 'text-left'} 
+                  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}
+                `}
               >
-                <strong>{msg.from === user?.userName ? 'You' : msg.from}:</strong> {msg.message}
+              <strong>{msg.from === user?.userName ? 'You' : msg.from}:</strong> {msg.message}
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
